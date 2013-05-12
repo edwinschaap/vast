@@ -35,8 +35,8 @@
      		   "histo1": {
             		"date_histogram": {
                 	"field": "parsedDate",
-                	"interval": interval || "day",
-                	"value_field": "firstSeenDestTotalBytes"
+                	"interval": interval || "1h",
+                	"value_field": "firstSeenSrcTotalBytes"
 	            	}
 	        	}
 	    	}

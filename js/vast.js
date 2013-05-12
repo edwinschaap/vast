@@ -1,114 +1,61 @@
-var VAST = function(opts) {
-	if ( !(this instanceof VAST)) {
-        return new VAST(opts);
-    }
+// override default location
+es.elasticServer = 'http://development.local/vast/es/';
 
-    var $ = this; //  Short reference
-    $.version = '0.0.1';
-
-    $.models = {}; // All models are stored in this
-    $.graphs = []; // All graphs currently on the page
-    $.utils = {};
-
-    $.utils.defaultColor = function() {
-    	var colors = d3.scale.category20().range();
-    	return function(d, i) { return d.color || colors[i % colors.length] };
-	}
+root = '#vast';
 
 
-    // Helper function 
-    $h = {
-        each: function(o,callback){
-            if(typeof(o.length)!=='undefined') {
-                for (var i=0; i<o.length; i++) {
-                    // Array or FileList
-                    if(callback(o[i])===false) return;
-                }
-            } else {
-                for (i in o) {
-                    // Object
-                    if(callback(i,o[i])===false) return;
-                }
-            }
-        }
-    }
+var margin = {top: 20, right: 20, bottom: 30, left: 150},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
 
-    // log function
-    $.log = function(message) {
-        if($.opts.log){
-            console.log(message);
-        }
-    }
+var parseDate = d3.time.format("%d-%b-%y").parse;
 
-    $.models.line = function(){
-    	function chart(selection){
-    		selection.each(function(data){
+var x = d3.time.scale()
+    .range([0, width]);
 
-    		});
-    	};
+var y = d3.scale.linear()
+    .range([height, 0]);
 
-    	return chart;
-    };
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");
 
-    $.models.lineChart = function(){
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left");
 
-    	var lines = $.models.line(),
-    		xAxis = d3.svg.axis(),
-    		yAxis = d3.svg.axis()
-    	;
-    	var margin = {top: 30, right: 20, bottom: 50, left: 60},
-    		color = $.utils.defaultColor(),
-    		width = null,
-    		height = null,
-    		x,
-    		y
-    	;
+var area = d3.svg.area()
+    .x(function(d) { return x(d.time); })
+    .y0(height)
+    .y1(function(d) { return y(d.total); });
 
-    	xAxis.orient('bottom');
-    	yAxis.orient('left');
+var svg = d3.select("#vast").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    	function chart(selection){
-    		selection.each(function(data) {
-    			var container = d3.select(this),
-          			that = this;
-          		var availableWidth = (width  || parseInt(container.style('width')) || 960)
-                        - margin.left - margin.right,
-          			availableHeight = (height || parseInt(container.style('height')) || 400)
-                        - margin.top - margin.bottom;
+es.nf.getFlows(function(data){
+  x.domain(d3.extent(data, function(d) { return d.time; }));
+  y.domain([0, d3.max(data, function(d) { return d.total; })]);
 
-                chart.update = function() { chart(selection) };
-      			chart.container = this;
+  svg.append("path")
+      .datum(data)
+      .attr("class", "area")
+      .attr("d", area);
 
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
 
-      			// Setup lines
-      			lines
-			        .width(availableWidth)
-			        .height(availableHeight)
-			        .color(data.map(function(d,i) {
-			          return d.color || color(d, i);
-			        }).filter(function(d,i) { return !data[i].disabled }));
-    			}
-
-    	};
-
-    	return chart;
-    }
-
-
-
-
-    // default options
-    $.defaults = {
-    	rootElement: 'body',
-    	elasticServer: 'http://localhost:9200/',
-    	width: 800
-    };
-
-    // Set options with given arguments or defaults
-    $.opts = opts||{};
-    $h.each($.defaults, function(key,value){
-        if(typeof($.opts[key])==='undefined') $.opts[key] = value;
-    });
-    // Return object
-    return(this);
-}
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Throughput");
+}, '5m');
