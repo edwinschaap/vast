@@ -13,8 +13,31 @@
   		</div>
   	</div>
 
+    <div id="vast"></div>
+
+
   <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
   <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.0.8/d3.min.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/es.js"></script>
+  <!--<script src="js/vast.js"></script>-->
+  <script type="text/javascript">
+
+    es.elasticServer = 'http://development.local/vast/es/';
+
+    es.nf.getFlows(function(data){
+      alert(data);
+    });
+
+
+
+
+    // var app = new VAST({
+    //   rootElement: '#vast',
+    //   elasticServer: 'http://vas.plexis.eu:9200/',
+    //   width: 800
+    // });
+    // app.run();
+  </script>
+
   </body>
 </html>

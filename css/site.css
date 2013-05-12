@@ -1,3 +1,8 @@
 body {
 	background: url('../img/debut_light.png') repeat;
 }
+
+.container {
+	max-width: 680px;
+	width: auto;
+}
