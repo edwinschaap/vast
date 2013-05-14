@@ -9,7 +9,7 @@
 	window.es = es;
 
 	// defaults
-	es.elasticServer = 'http://localhost:9200/';
+	es.elasticServer = 'http://vas.plexis.eu:9200/';
 
 	es.query = function(data, index, callback){
 		$.ajax({
